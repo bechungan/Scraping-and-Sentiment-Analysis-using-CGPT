@@ -1,0 +1,48 @@
+import openai
+import pandas as pd
+
+openai.api_key = "OPENAPI KEY"  # write down API key
+
+input_file = 'filename.csv'  # 입력 파일 경로
+output_file = 'filename_result2.csv'  # 출력 파일 경로
+
+# CSV 파일 읽어오기
+df = pd.read_csv(input_file, encoding='utf-8-sig')
+
+# 새로운 데이터프레임 생성
+result_df = pd.DataFrame(columns=['문장번호', '이유'])
+
+# 각 행에 대해 분석 수행 및 결과 저장
+for index, row in df.iterrows():
+    sentence_number = row['sentenceNo']
+    posting = row['postings']
+
+    # OpenAI API로 분석 요청
+    try:
+        messages = [
+            {"role":"system", "content": "You are an AI assistant that detects attitudes toward COVID-19 vaccines in posts. "},
+            {"role": "user", "content": f"{posting} Detect the attitude toward vaccines in the provided text as positive, negative, or neutral. If it's challenging to distinguish accurately, respond with 'Uncertain.'"}
+        ]
+
+
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            max_tokens=100,
+            n=1,
+            stop=None,
+            temperature=0
+        )
+
+        response = completion.choices[0].message['content'].strip()
+
+        # Add the result to a new data frame
+        result_df = result_df.append({'Sentence_No': sentence_number, 'Reason': response}, ignore_index=True)
+
+    except openai.error.APIError as e:
+        print(f"API error occurred for sentence {sentence_number}: {e}")
+
+# Save the result data frame as a CSV file
+result_df.to_csv(output_file, index=False, encoding='utf-8-sig')
+
+print(f"Analysis results saved to {output_file}.")
