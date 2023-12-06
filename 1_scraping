@@ -1,0 +1,76 @@
+import time
+import random
+import pandas as pd
+import bs4
+from selenium import webdriver
+
+driver = webdriver.Chrome('C:/chromedriver_win32/chromedriver.exe')
+driver.get('https://www.teamblind.com/kr/')
+driver.implicitly_wait(10)
+
+# Get first 20 posts
+titles = []
+contents = []
+companies = []
+write_dates = []
+category_tags = []
+
+html = driver.page_source
+soup = bs4.BeautifulSoup(html, "html.parser")
+title_tags = soup.select('.article-list-pre > .tit > h3 > a')
+content_tags = soup.select('.article-list-pre > .tit > .pre-txt > a')
+company_tags = soup.select('.article-list-pre > .sub > .name > a')
+info_fnc_list = soup.select('.article-list-pre > .sub > .wrap-info > .info_fnc')
+category_list = soup.select('.article-list-pre > .category > a:nth-of-type(2)')
+
+for idx, info_fnc in enumerate(info_fnc_list):
+    titles.append(title_tags[idx].text)
+    contents.append(content_tags[idx].text)
+    companies.append(company_tags[idx].text)
+    write_dates.append(info_fnc.text.strip()[4:])
+    if idx < len(category_list):
+        category_tags.append(category_list[idx].text)
+    else:
+        category_tags.append('')
+
+# scroll down to retrieve the remaining posts.
+last_height = driver.execute_script("return document.body.scrollHeight")
+while True:
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    scroll_interval = random.randint(1, 4)  # Set the scroll interval with a random number between 1 and 4 seconds
+    time.sleep(scroll_interval)
+    new_height = driver.execute_script("return document.body.scrollHeight")
+    if new_height == last_height:
+        break
+    last_height = new_height
+
+    html = driver.page_source
+    soup = bs4.BeautifulSoup(html, "html.parser")
+    title_tags = soup.select('.article-list-pre > .tit > h3 > a')
+    content_tags = soup.select('.article-list-pre > .tit > .pre-txt > a')
+    company_tags = soup.select('.article-list-pre > .sub > .name > a')
+    category_list = soup.select('.article-list-pre > .category > a:nth-of-type(2)')
+    info_fnc_list = soup.select('.article-list-pre > .sub > .wrap-info > .info_fnc')
+
+    for idx, info_fnc in enumerate(info_fnc_list):
+        titles.append(title_tags[idx].text)
+        contents.append(content_tags[idx].text)
+        companies.append(company_tags[idx].text)
+        write_dates.append(info_fnc.text.strip()[4:])
+        if idx < len(category_list):
+            category_tags.append(category_list[idx].text)
+        else:
+            category_tags.append('')
+    if len(titles) >= 2000:
+        break
+
+
+# Change into Dataframe
+data = {'번호': list(range(1, len(titles) + 1)), 'write_date': write_dates, 'title': titles, 'company': companies, 'content': contents, 'category': category_tags}
+df = pd.DataFrame(data)
+
+# Save as an excel file
+df.to_excel('230924_blahblah.xlsx', index=False)
+
+# test: print(len(category_list), len(info_fnc_list))
+
