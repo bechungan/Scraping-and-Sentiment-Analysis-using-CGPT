@@ -66,7 +66,7 @@ while True:
 
 
 # Change into Dataframe
-data = {'번호': list(range(1, len(titles) + 1)), 'write_date': write_dates, 'title': titles, 'company': companies, 'content': contents, 'category': category_tags}
+data = {'Number': list(range(1, len(titles) + 1)), 'write_date': write_dates, 'title': titles, 'company': companies, 'content': contents, 'category': category_tags}
 df = pd.DataFrame(data)
 
 # Save as an excel file
