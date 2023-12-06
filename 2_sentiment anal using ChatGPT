@@ -1,23 +1,23 @@
 import openai
 import pandas as pd
 
-openai.api_key = "OPENAPI KEY"  # write down API key
+openai.api_key = "OPENAPI KEY"  # Write down your API key
 
-input_file = 'filename.csv'  # 입력 파일 경로
-output_file = 'filename_result2.csv'  # 출력 파일 경로
+input_file = 'filename.csv'  # Input File Path
+output_file = 'filename_result2.csv'  # Output File Path
 
-# CSV 파일 읽어오기
+# Read CSV file
 df = pd.read_csv(input_file, encoding='utf-8-sig')
 
-# 새로운 데이터프레임 생성
-result_df = pd.DataFrame(columns=['문장번호', '이유'])
+# Create a new dataframe
+result_df = pd.DataFrame(columns=['Sentence_no', 'Sentiment'])
 
-# 각 행에 대해 분석 수행 및 결과 저장
+# Perform analysis for each row and save the results
 for index, row in df.iterrows():
     sentence_number = row['sentenceNo']
     posting = row['postings']
 
-    # OpenAI API로 분석 요청
+    # Request analysis through the OpenAI API
     try:
         messages = [
             {"role":"system", "content": "You are an AI assistant that detects attitudes toward COVID-19 vaccines in posts. "},
@@ -36,8 +36,8 @@ for index, row in df.iterrows():
 
         response = completion.choices[0].message['content'].strip()
 
-        # Add the result to a new data frame
-        result_df = result_df.append({'Sentence_No': sentence_number, 'Reason': response}, ignore_index=True)
+        # Add the result to a new dataframe
+        result_df = result_df.append({'Sentence_No': sentence_number, 'Sentiment': response}, ignore_index=True)
 
     except openai.error.APIError as e:
         print(f"API error occurred for sentence {sentence_number}: {e}")
