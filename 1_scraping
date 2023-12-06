@@ -5,7 +5,7 @@ import bs4
 from selenium import webdriver
 
 driver = webdriver.Chrome('C:/chromedriver_win32/chromedriver.exe')
-driver.get('https://www.teamblind.com/kr/')
+driver.get('https://www.teamblind.com/kr/topics/%ED%86%A0%ED%94%BD-%EB%B2%A0%EC%8A%A4%ED%8A%B8')
 driver.implicitly_wait(10)
 
 # Get first 20 posts
