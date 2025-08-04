@@ -1,0 +1,43 @@
+# Load required libraries
+install.packages("arules")
+install.packages("arulesViz")
+library(arules)
+library(arulesViz)
+
+# Set working directory if needed (optional)
+# setwd("your/working/directory")
+
+# Read CSV file (replace with relative path or parameter)
+data <- read.transactions("vaccine_pos_reason_total_result2_asso_process.csv", sep = ",")
+
+# Check data structure
+inspect(head(data, 3))
+summary(data)
+
+# Find the most frequent items
+frequentItems <- eclat(data, parameter = list(supp = 0.07, maxlen = 5))
+inspect(frequentItems)
+
+# Plot item frequency
+itemFrequencyPlot(data, topN = 10, type = "absolute", main = "Item Frequency")
+
+# Generate association rules
+rules <- apriori(data, parameter = list(supp = 0.005, conf = 0.4))
+
+# Sort by confidence
+rules_conf <- sort(rules, by = "confidence", decreasing = TRUE)
+inspect(head(rules_conf))
+
+# Sort by lift
+rules_lift <- sort(rules, by = "lift", decreasing = TRUE)  
+inspect(rules_lift)
+summary(rules_lift)
+
+# Export rules to CSV
+write(rules_lift, file = "rulesPos.csv", sep = ",")
+
+# Visualizations
+plot(rules, method = "grouped")
+plot(rules, method = "graph", edge.lwd = 2)
+plot(rules, method = "graph", control = list(type = "items"))
+plot(rules, method = "paracoord", control = list(reorder = TRUE))
